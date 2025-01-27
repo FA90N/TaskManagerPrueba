@@ -19,10 +19,20 @@ namespace TaskManagerPrueba.Controllers
         }
 
         // GET: Tasks
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string category)
         {
-            var taskmanagerContext = _context.Tasks.Include(t => t.Category);
-            return View(await taskmanagerContext.ToListAsync());
+            // Obtener las categorías para el dropdown
+            ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name");
+
+            // Filtrar las tareas por la categoría seleccionada
+            var tasks = _context.Tasks.Include(t => t.Category).AsQueryable();
+
+            if (!string.IsNullOrEmpty(category))
+            {
+                tasks = tasks.Where(t => t.Category.Id == int.Parse(category));
+            }
+
+            return View(await tasks.ToListAsync());
         }
 
         // GET: Tasks/Details/5
